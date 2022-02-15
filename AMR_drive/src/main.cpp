@@ -26,7 +26,7 @@ int Mspeeds[2] = {0, 0};
 QEI wheel_r(PA_2, PA_0, NC, 600, QEI::X4_ENCODING);
 QEI wheel_l(PA_1, PA_0, NC, 600, QEI::X4_ENCODING);
 
-double WCS[2] = {wheel_l.getPulses(), wheel_r.getPulses()};
+int64_t WCS[2] = {wheel_l.getPulses(), wheel_r.getPulses()};
 
 long EncoderVal[2] = {0, 0};
 double DDis[2] = {0, 0};
@@ -285,8 +285,6 @@ void motorGo(uint8_t l, uint8_t r) {
 
 
 void MotorWrite() {
-  int DIR;
-  int min_speed;
   double MSpeed;
 
   if ( ((WCS[0] > 0 && WCS[1] > 0)  || (WCS[0] < 0 && WCS[1] < 0)) && (WCS[0] == WCS[1])  ) {
