@@ -4,6 +4,7 @@
 #include <std_msgs/String.h>
 #include <geometry_msgs/Twist.h>
 #include <stdlib.h>
+#include "millis.h"
 
 int OdomCount = 0;
 
@@ -23,8 +24,8 @@ int CVEL[2] = {0, 0};
 int Mspeeds[2] = {0, 0};
 
 //Use X4 encoding.
-QEI wheel_r(PA_2, PA_0, NC, 600, QEI::X4_ENCODING);
-QEI wheel_l(PA_1, PA_0, NC, 600, QEI::X4_ENCODING);
+QEI wheel_r(D3 , D6 , NC, 600, QEI::X4_ENCODING);
+QEI wheel_l(D14, D15, NC, 600, QEI::X4_ENCODING);
 
 int64_t WCS[2] = {wheel_l.getPulses(), wheel_r.getPulses()};
 
@@ -51,10 +52,10 @@ int bot_vel;
 int count = 0;
 
 // int dir1 = PA_6, pwm1 = PA_7, dir2 = PA_9,  pwm2 = PA_8;
-DigitalOut dir1(PA_6);
-PwmOut pwm1 (PA_7) ;
-DigitalOut dir2(PA_9);
-PwmOut pwm2 (PA_8) ;
+DigitalOut dir1(D12); 
+PwmOut pwm1 (D11) ; 
+DigitalOut dir2(D5); 
+PwmOut pwm2 (D4) ;
 
 int motor_speed_l = 0, motor_speed_r = 0;
 
@@ -153,7 +154,7 @@ double MWS[2] = {0, 0};
 
 double CorrectedSpeed_FB(double CVel) { //only forward, backward
   if (Time_fb == 0) {
-    Time_fb = us_ticker_read();
+    Time_fb = millis(); //us_ticker_read();
     return 0;
   }
 
@@ -168,7 +169,7 @@ double CorrectedSpeed_FB(double CVel) { //only forward, backward
     counterL_backward = counterR_backward = 0;
   }
 
-  long T = us_ticker_read();
+  long T = millis(); //us_ticker_read();
   int DTime = T - Time_fb;
   Time_fb = T;
 
@@ -207,8 +208,8 @@ double CorrectedSpeed_FB(double CVel) { //only forward, backward
 
 double CorrectedSpeed(int M, double CVel) {
   if (Time[0] == 0 && Time[1] == 0) {
-    Time[0] = us_ticker_read();
-    Time[1] = us_ticker_read();
+    Time[0] = millis() ; //us_ticker_read();
+    Time[1] = millis() ; //us_ticker_read();
     return 0;
   }
 
@@ -234,7 +235,7 @@ double CorrectedSpeed(int M, double CVel) {
   }
 
 
-  long T = us_ticker_read();
+  long T = millis() ; //us_ticker_read();
   int DTime = T - Time[M];
   Time[M] = T;
 
@@ -279,8 +280,11 @@ void motorGo(uint8_t l, uint8_t r) {
   else if (WCS[0] < 0 && WCS[1] > 0)
     left();
 
-  pwm1.write(l/255);
-  pwm2.write(r/255);
+  float pwm_l = l/255 ; 
+  float pwm_r = r/255 ;
+
+  pwm1.write(pwm_l);
+  pwm2.write(pwm_r);
 }
 
 
@@ -309,6 +313,7 @@ void MotorWrite() {
 int main() {
 
   // put your setup code here, to run once:
+  millisStart();
   nh.initNode();
   nh.advertise(Pub);
   nh.subscribe(sub);
