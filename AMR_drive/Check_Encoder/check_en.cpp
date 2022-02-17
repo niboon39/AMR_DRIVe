@@ -2,10 +2,10 @@
 #include "QEI.h"
 
 //Use X4 encoding.
-QEI wheel_r(PA_2, PA_0, NC, 600, QEI::X4_ENCODING);
-QEI wheel_l(PA_1, PA_0, NC, 600, QEI::X4_ENCODING);
+QEI wheel_r(D3 , D6 , NC, 600, QEI::X4_ENCODING);
+QEI wheel_l(D14, D15, NC, 600, QEI::X4_ENCODING);
 
-Serial pc (USBTX , USBRX , 115200) ; 
+Serial pc (USBTX , USBRX , 57600) ; 
 
 int main(){
     while (1)
