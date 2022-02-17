@@ -1,7 +1,7 @@
 #include "mbed.h"
 
 DigitalOut dir1(PA_6); PwmOut pwm1 (PA_7) ; DigitalOut dir2(PA_9); PwmOut pwm2 (PA_8) ;
-Serial pc (USBTX , USBRX , 115200) ;
+Serial pc(USBTX , USBRX , 57600) ;
 int pwm  = 0 ;
 
 void right() {
@@ -29,24 +29,22 @@ void stop() {
 }
 
 int main () {
+  pc.printf("Program start..\n");
   while (1)
   {
     /* code */
     char str = pc.getc() ;
     if (str == 'q') {
       pwm += 10 ;
-      pc.printf("PWM : ");
-      pc.printf("%d" , pwm);
+      pc.printf("PWM : %d \n" , pwm);
     }
     else if (str == 'e') {
       pwm -= 10 ;
-      pc.printf("PWM : ");
-      pc.printf("%d" , pwm);
+      pc.printf("PWM : %d \n" , pwm);
     }
     else if (str == 'r') {
       pwm = 50 ;
-      pc.printf("PWM : ");
-      pc.printf("%d" , pwm);
+      pc.printf("PWM : %d \n" , pwm);
     }
     switch (str)
     {
@@ -77,8 +75,7 @@ int main () {
 
       default:
         stop();
-        pc.printf("PWM : ");
-        pc.printf("%d" , pwm);
+        pc.printf("PWM : %d \n" , pwm);
         break;
     }
     pwm1.write(pwm / 255);
