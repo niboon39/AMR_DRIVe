@@ -1,8 +1,12 @@
 #include "mbed.h"
 
-DigitalOut dir1(PA_6); PwmOut pwm1 (PA_7) ; DigitalOut dir2(PA_9); PwmOut pwm2 (PA_8) ;
+DigitalOut dir1(D12); 
+PwmOut pwm1 (D11) ; 
+DigitalOut dir2(D5); 
+PwmOut pwm2 (D4) ;
+
 Serial pc(USBTX , USBRX , 57600) ;
-int pwm  = 0 ;
+float pwm  = 0.0 ;
 
 void right() {
   dir1 = 0 ;
@@ -34,52 +38,65 @@ int main () {
   {
     /* code */
     char str = pc.getc() ;
-    if (str == 'q') {
-      pwm += 10 ;
-      pc.printf("PWM : %d \n" , pwm);
-    }
-    else if (str == 'e') {
-      pwm -= 10 ;
-      pc.printf("PWM : %d \n" , pwm);
-    }
-    else if (str == 'r') {
-      pwm = 50 ;
-      pc.printf("PWM : %d \n" , pwm);
-    }
+    
     switch (str)
     {
+      case 'q':
+        pwm += 10.0 ;
+        pc.printf("PWM : %.2f \n" , pwm);
+        break;
+
+      case 'e':
+        pwm -= 10.0 ;
+        pc.printf("PWM : %.2f \n" , pwm);
+        break ; 
+
+      case 'r':
+        pwm = 50.0 ;
+        pc.printf("PWM : %.2f \n" , pwm);
+        break ;
+        
       case 'w':
         forward() ;
-        pc.printf("forward");
+        pwm1.write(pwm/255);
+        pwm2.write(pwm/255);
+        pc.printf("forward\n");
         break ;
 
       case 'a':
         left();
-        pc.printf("turnleft");
+        pwm1.write(pwm/255);
+        pwm2.write(pwm/255);
+        pc.printf("turnleft\n");
         break ;
 
       case 'd':
         right() ;
-        pc.printf("turnright");
+        pwm1.write(pwm/255);
+        pwm2.write(pwm/255);
+        pc.printf("turnright\n");
         break ;
 
       case 's':
         stop() ;
-        pc.printf("Stop");
+        pc.printf("Stop\n");
         break ;
 
       case 'x':
         backward();
-        pc.printf("backward");
+        pwm1.write(pwm/255);
+        pwm2.write(pwm/255);
+        pc.printf("backward\n");
         break ;
 
       default:
         stop();
-        pc.printf("PWM : %d \n" , pwm);
+        pc.printf("PWM : %.2f \n" , pwm);
         break;
     }
-    pwm1.write(pwm / 255);
-    pwm2.write(pwm / 255);
+  // pwm1.write(pwm/255);
+  // pwm2.write(pwm/255);
+    // pc.printf("%f\n" , pwm);
   }
 
 }
