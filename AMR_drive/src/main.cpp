@@ -27,7 +27,7 @@ int Mspeeds[2] = {0, 0};
 QEI wheel_r(D3 , D6 , NC, 600, QEI::X4_ENCODING);
 QEI wheel_l(D14, D15, NC, 600, QEI::X4_ENCODING);
 
-int64_t WCS[2] = {wheel_l.getPulses(), wheel_r.getPulses()};
+double WCS[2] = {(float)wheel_l.getPulses(), (float)wheel_r.getPulses()};
 
 long EncoderVal[2] = {0, 0};
 double DDis[2] = {0, 0};
@@ -45,29 +45,29 @@ volatile int counterR_forward = 0;
 volatile int counterL_backward = 0;
 volatile int counterR_backward = 0;
 
-int AccParam = 3;  //3; //acceleration multiplie8Ur.
+int AccParam = 3;  //3; //acceleration multiplier.
 
 
 int bot_vel;
 int count = 0;
 
-// int dir1 = PA_6, pwm1 = PA_7, dir2 = PA_9,  pwm2 = PA_8;
-DigitalOut dir1(D12); 
-PwmOut pwm1 (D11) ; 
-DigitalOut dir2(D5); 
-PwmOut pwm2 (D4) ;
+/* left */
+DigitalOut dir1(D12); PwmOut pwm1 (D11) ; 
+/* right */
+DigitalOut dir2(D5); PwmOut pwm2 (D4) ;
 
 int motor_speed_l = 0, motor_speed_r = 0;
 
-
-
 ros::NodeHandle  nh;
-
 geometry_msgs::Twist odom_msg;
-geometry_msgs::Twist odom_msg2;
+// geometry_msgs::Twist odom_msg2;
+ros::Publisher Pub ("ard_odom", &odom_msg);
 
-ros::Publisher Pub ("stm_odom", &odom_msg);
 
+// std_msgs::String str_msg;
+// ros::Publisher chatter("chatter", &str_msg);
+
+// char hello[13] = "hello world!";
 
 void countL_forward() {
   if (WCS[0]  > 0)
@@ -280,8 +280,8 @@ void motorGo(uint8_t l, uint8_t r) {
   else if (WCS[0] < 0 && WCS[1] > 0)
     left();
 
-  float pwm_l = l/255 ; 
-  float pwm_r = r/255 ;
+  float pwm_l =  (float) l/255 ; 
+  float pwm_r =  (float) r/255 ;
 
   pwm1.write(pwm_l);
   pwm2.write(pwm_r);
@@ -310,39 +310,51 @@ void MotorWrite() {
   motorGo(motor_speed_l, motor_speed_r);
 }
 
+Timer t ; 
+
 int main() {
 
   // put your setup code here, to run once:
   millisStart();
+  t.start() ; 
   nh.initNode();
   nh.advertise(Pub);
   nh.subscribe(sub);
+  // nh.advertise(chatter);
+  long publisher_timer = 0;
 
   while (1) {
-    // put your main code here, to run repeatedly:
-    nh.spinOnce();
+        
+    // str_msg.data = hello;
+    // chatter.publish( &str_msg );
+    // wait_ms(0.2);
+    
+    if ((t.read_ms() - publisher_timer) > 20){
+      publisher_timer = t.read_ms() ; 
 
-    if ( OdomCount > OdomWait) { // update 1 second  OdomCount > OdomWait[3]
+      if ( OdomCount > OdomWait) { // update 1 second  OdomCount > OdomWait[3]
 
+        if (Vels[0] == 0 and Vels[1] == 0) {
+          odom_msg.linear.x = 0;
+          odom_msg.linear.y = 0;
+        }
+        else if (WCS[0] == WCS[1]) {
+          odom_msg.linear.x = Vels[0];
+          odom_msg.linear.y = Vels[0];
+        }
+        else {
+          odom_msg.linear.x = Vels[0];
+          odom_msg.linear.y = Vels[1];
+        }
+        // timeold = millis();
+        Pub.publish(&odom_msg);
+      } else {
+        OdomCount ++ ;
+      }
 
-      if (Vels[0] == 0 and Vels[1] == 0) {
-        odom_msg.linear.x = 0;
-        odom_msg.linear.y = 0;
-      }
-      else if (WCS[0] == WCS[1]) {
-        odom_msg.linear.x = Vels[0];
-        odom_msg.linear.y = Vels[0];
-      }
-      else {
-        odom_msg.linear.x = Vels[0];
-        odom_msg.linear.y = Vels[1];
-      }
-      // timeold = millis();
-      Pub.publish(&odom_msg);
-    } else {
-      OdomCount ++ ;
+      MotorWrite(); //Takes WCS and corrects speed of motors with encoders
     }
-
-    MotorWrite(); //Takes WCS and corrects speed of motors with encoders
+    nh.spinOnce();
   }
+  
 }
