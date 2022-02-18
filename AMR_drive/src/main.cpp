@@ -60,7 +60,6 @@ int motor_speed_l = 0, motor_speed_r = 0;
 
 ros::NodeHandle  nh;
 geometry_msgs::Twist odom_msg;
-// geometry_msgs::Twist odom_msg2;
 ros::Publisher Pub ("ard_odom", &odom_msg);
 
 
@@ -328,11 +327,9 @@ int main() {
     // str_msg.data = hello;
     // chatter.publish( &str_msg );
     // wait_ms(0.2);
-    
-    if ((t.read_ms() - publisher_timer) > 20){
-      publisher_timer = t.read_ms() ; 
 
-      if ( OdomCount > OdomWait) { // update 1 second  OdomCount > OdomWait[3]
+    if ((t.read_ms() - publisher_timer) > 20){
+        publisher_timer = t.read_ms() ; 
 
         if (Vels[0] == 0 and Vels[1] == 0) {
           odom_msg.linear.x = 0;
@@ -348,13 +345,11 @@ int main() {
         }
         // timeold = millis();
         Pub.publish(&odom_msg);
-      } else {
-        OdomCount ++ ;
       }
 
       MotorWrite(); //Takes WCS and corrects speed of motors with encoders
+      nh.spinOnce();
     }
-    nh.spinOnce();
-  }
-  
+    
 }
+
