@@ -1,9 +1,7 @@
 #include "mbed.h"
 
-DigitalOut dir1(D12); 
-PwmOut pwm1 (D11) ; 
-DigitalOut dir2(D5); 
-PwmOut pwm2 (D4) ;
+DigitalOut dir1(D12); PwmOut pwm1 (D11) ; 
+DigitalOut dir2(D5); PwmOut pwm2 (D4) ;
 
 Serial pc(USBTX , USBRX , 57600) ;
 float pwm  = 0.0 ;
