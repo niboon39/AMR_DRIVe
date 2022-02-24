@@ -52,7 +52,7 @@ int bot_vel;
 int count = 0;
 
 /* left */
-DigitalOut dir1(D12); PwmOut pwm1 (D11) ; 
+DigitalOut dir1(D12); PwmOut pwm1 (D11) ;
 /* right */
 DigitalOut dir2(D5); PwmOut pwm2 (D4) ;
 
@@ -279,8 +279,8 @@ void motorGo(uint8_t l, uint8_t r) {
   else if (WCS[0] < 0 && WCS[1] > 0)
     left();
 
-  float pwm_l =  (float) l/255 ; 
-  float pwm_r =  (float) r/255 ;
+  float pwm_l =  (float) l / 255 ;
+  float pwm_r =  (float) r / 255 ;
 
   pwm1.write(pwm_l);
   pwm2.write(pwm_r);
@@ -309,13 +309,13 @@ void MotorWrite() {
   motorGo(motor_speed_l, motor_speed_r);
 }
 
-Timer t ; 
+Timer t ;
 
 int main() {
 
   // put your setup code here, to run once:
   millisStart();
-  t.start() ; 
+  t.start() ;
   nh.initNode();
   nh.advertise(Pub);
   nh.subscribe(sub);
@@ -323,33 +323,34 @@ int main() {
   long publisher_timer = 0;
 
   while (1) {
-        
+
     // str_msg.data = hello;
     // chatter.publish( &str_msg );
     // wait_ms(0.2);
 
-    if ((t.read_ms() - publisher_timer) > 20){
-        publisher_timer = t.read_ms() ; 
+    if ((t.read_ms() - publisher_timer) > 100) {
+      publisher_timer = t.read_ms() ;
 
-        if (Vels[0] == 0 and Vels[1] == 0) {
-          odom_msg.linear.x = 0;
-          odom_msg.linear.y = 0;
-        }
-        else if (WCS[0] == WCS[1]) {
-          odom_msg.linear.x = Vels[0];
-          odom_msg.linear.y = Vels[0];
-        }
-        else {
-          odom_msg.linear.x = Vels[0];
-          odom_msg.linear.y = Vels[1];
-        }
-        // timeold = millis();
-        Pub.publish(&odom_msg);
+      if (Vels[0] == 0 and Vels[1] == 0) {
+        odom_msg.linear.x = 0;
+        odom_msg.linear.y = 0;
       }
-
-      MotorWrite(); //Takes WCS and corrects speed of motors with encoders
-      nh.spinOnce();
+      else if (WCS[0] == WCS[1]) {
+        odom_msg.linear.x = Vels[0];
+        odom_msg.linear.y = Vels[0];
+      }
+      else {
+        odom_msg.linear.x = Vels[0];
+        odom_msg.linear.y = Vels[1];
+      }
+      // timeold = millis();
+      Pub.publish(&odom_msg);
     }
-    
+
+    MotorWrite(); //Takes WCS and corrects speed of motors with encoders
+    nh.spinOnce();
+    // wait_ms(10);
+  }
+
 }
 
